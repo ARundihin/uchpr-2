@@ -1,0 +1,141 @@
+#include <iostream>  //n * h + m, n - введенное число, h - высота дерева, m - общее количество узлов в дереве.
+using namespace std;
+
+struct TREE
+{
+	int  d;           
+	TREE* left;       
+	TREE* right;      
+	int nodes;
+};
+
+TREE* search(TREE*, int);
+void    add(TREE*&, int, int*&);
+void    print_tree(TREE*);
+void    del_tree(TREE*& top);
+void	countnodes(int*& numnodes, TREE* top, int& currel);
+
+void main()
+{
+	setlocale(LC_ALL, "rus");
+	int maxind = 0;
+	int maxel = 0;
+	int currel = 1;
+	int n;
+	cout << "Введите количество вершин" << endl;
+	cin >> n;
+	cout << "Введите ввершины" << endl;
+	int* b = new int[n];
+	int* numnodes = new int[n] {0};
+	TREE* top = nullptr;
+
+	for (int i = 0; i < n; i++)
+	{
+		cin >> b[i];
+		add(top, b[i], b);  
+	}
+	     
+	cout << endl << endl;
+
+	if (top != nullptr)
+	{
+		numnodes[0] = top->nodes;
+		countnodes(numnodes, top, currel);
+	}
+
+	for (int i = 0; numnodes[i] != 0; i++)
+	{
+		if (numnodes[i] >= maxel)
+		{
+			maxel = numnodes[i];
+			maxind = i;
+		}
+	}
+
+	cout << "Number of max nodes " << numnodes[maxind] << endl;
+	cout << "Number of max ind " << maxind + 1 << endl;
+
+	del_tree(top);        
+	delete[] b;
+	delete[] numnodes;
+}
+
+TREE* search(TREE* top, int d)
+{
+	TREE* pv = top, * ppv = top;
+	while (pv)
+	{
+		ppv = pv;
+		if (d < pv->d)
+			pv = pv->left;
+		else
+			pv = pv->right;
+	}
+	return ppv;
+}
+
+void add(TREE*& top, int d, int*& arr)
+{
+	TREE* pnew = new TREE;  
+	pnew->nodes = 0;
+	pnew->d = d;
+	pnew->left = NULL;
+	pnew->right = NULL;
+	if (!top)
+		top = pnew;
+	else
+	{
+		TREE* ppv;
+		ppv = search(top, d); 
+
+		if (d < ppv->d)
+		{
+			ppv->left = pnew;
+			ppv->nodes++;
+		}
+
+		else
+		{
+			ppv->right = pnew;
+			ppv->nodes++;
+		}
+	}
+}
+
+void del_tree(TREE*& top)
+{
+	if (top)
+	{
+		del_tree(top->left);
+		del_tree(top->right);
+		delete top;            
+		top = NULL;
+	}
+}
+
+void countnodes(int*& numnodes, TREE* top, int& currel)
+{
+	if (top->right != nullptr && top->left != nullptr)
+	{
+		numnodes[currel] += top->right->nodes;
+		numnodes[currel] += top->left->nodes;
+		currel++;
+		countnodes(numnodes, top->right, currel);
+		countnodes(numnodes, top->left, currel);
+	}
+	else
+	{
+		if (top->right != nullptr)
+		{
+			numnodes[currel] += top->right->nodes;
+			currel++;
+			countnodes(numnodes, top->right, currel);
+		}
+		else if (top->left != nullptr)
+		{
+			numnodes[currel] += top->left->nodes;
+			currel++;
+			countnodes(numnodes, top->left, currel);
+		}
+	}
+}
