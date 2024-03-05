@@ -1,6 +1,6 @@
 #include <iostream>// l1 * l2 *(l1 + l2) + l1 + l2
 
-using namespace std; // индекс указывающий на следующий элемент при последнем элементе должен равняться -1
+using namespace std;
 
 struct List
 {
@@ -9,7 +9,6 @@ struct List
     int lenlist;
     int beg;
     int end;
-
 };
 
 void createList(List* L, int len, short n);
@@ -50,18 +49,20 @@ int main()
     CreateListL(L1, L2, L, l1, l2);
     Print(L, letters);
 
-    delete[] L1->data;
-    delete[] L1->next;
-    delete[] L2->data;
-    delete[] L2->next;
+    if (L1->next[0] != -1 || L2->next[0] != -1)
+    {
+        delete L->next;
+        delete L->data;
+    }
+
+    delete L1->next;
+    delete L1->data;
+    delete L2->next;
+    delete L2->data;
     delete L1;
     delete L2;
-    delete[] L->data;
-    delete[]L->next;
     delete L;
     
-
-
     return 0;
 }
 
@@ -133,27 +134,42 @@ void CreateListL(List* &L1, List* &L2, List* &L,int &l1,int &l2)
             behcur = i;
             i = L2->next[i];
         }
+
+        L->data[l] = L2->data[behcur];
     }
 
-    L->data[l] = L2->data[behcur];
     L->next[l] = -1;
 
 }
 
 void findel(List*& L1, List*& L2, int& l1, int& l2, char delel)
 {
-    int behcur = L1->beg;
-    for (int i = L1->beg; i != -1; )
+    bool oneEl = false;
+
+    if (l1 == 1)
     {
-        if (L1->data[i] == delel)
+        oneEl = true;
+    }
+
+    int behcur = L1->beg;
+    for (int i = L1->beg; i != -1 || oneEl != false; )
+    {
+        if (oneEl == true)
         {
-            if (i == L1->beg)
+            l1 = 0;
+            oneEl = false;
+        }
+        else if (L1->data[i] == delel)
+        {
+            if  (i == L1->beg)
             {
-                L1->beg++;
+                L1->next[behcur] = L1->next[i];
+                L1->beg = L1->next[L1->beg];
                 l1--;
             }
             else if (L1->next[i] != -1)
             {
+                L1->next[behcur] = -1;
                 L1->end--;
                 l1--;
             }
@@ -168,18 +184,30 @@ void findel(List*& L1, List*& L2, int& l1, int& l2, char delel)
         i = L1->next[i];
     }
 
-    behcur = L2->beg;
-    for (int i = L2->beg; i != -1; )
+    if (l2 == 1)
     {
-        if (L2->data[i] == delel)
+        oneEl = true;
+    }
+
+    behcur = L2->beg;
+    for (int i = L2->beg; i != -1 || oneEl != false; )
+    {
+        if (oneEl == true)
+        {
+            l2 = 0;
+            oneEl = false;
+        }
+        else if (L2->data[i] == delel)
         {
             if (i == L2->beg)
             {
-                L2->beg++;
+                L2->next[behcur] = L2->next[i];
+                L2->beg = L2->next[L2->beg];
                 l2--;
             }
             else if (L2->next[i] != -1)
             {
+                L2->next[behcur] = -1;
                 L2->end--;
                 l2--;
             }
@@ -191,22 +219,25 @@ void findel(List*& L1, List*& L2, int& l1, int& l2, char delel)
         }
 
         behcur = i;
-        i = L2->next[i];
+        if (i != -1)
+        {
+            i = L2->next[i];
+        }
     }
 }
 
 void Print(List* L,bool letters[])
 {
-    for (int i = 0; L->next[i] != -1; )
+    for (int i = 0; i != -1; )
     {
         if (letters[int(L->data[i])] == 0 )
         {
             letters[int(L->data[i])]++;
             cout << L->data[i] << " ";
         }
-        
+
         i = L->next[i];
     }
-
 }
+
 
